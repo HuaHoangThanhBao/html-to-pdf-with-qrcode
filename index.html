@@ -1,0 +1,174 @@
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="stylesheet" href="style.css">
+    <title>QR Photoshop</title>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.3.1/jspdf.umd.min.js"></script>
+    <script type="text/javascript" src="https://html2canvas.hertzen.com/dist/html2canvas.min.js"></script>
+    <script type="text/javascript" src="https://html2canvas.hertzen.com/dist/html2canvas.js"></script>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Poppins&display=swap" rel="stylesheet">
+  </head>
+
+<body>
+    <div id="capture" class="container">
+        <div id="image-cover" class="image-cover" style="background-image: url('https://cdn.glitch.com/32e4f0e7-2f71-403e-9687-6c56c8b2fafc%2Floli.jpg?v=1625929859020')">
+            <div class="top">
+                <div class="col flex-start col-4">
+                    <img id="logo" class="logo-img" src="https://cdn.glitch.com/32e4f0e7-2f71-403e-9687-6c56c8b2fafc%2Fgit.png?v=1625929855547" crossorigin="anonymous">
+                </div>
+                <div class="col flex-end col-6" id="qrcode"></div>
+            </div>
+            <div class="bottom">
+                <h1 id="name" class="color-black">Hứa Hoàng Thanh Bảo</h1>
+            </div>
+        </div>
+    </div>
+  <div class="description">
+    <br>
+        <h2>
+            Logo
+        </h2>
+        <button id="turn-on-logo">
+            Hiện Logo
+        </button>
+        <button id="turn-off-logo">
+            Ẩn logo
+        </button>
+        <input type="file" id="logo-change" name="logo-image" />
+        <br>
+        <br>
+        <h2>
+            Tên thay thế
+        </h2>
+    <br>
+        <input id="replace-name" placeholder="Tên thay thế...">
+        <input id="color" placeholder="Mã màu">
+        <br>
+        <br>
+        <h2>
+            Background
+        </h2>
+        <br>
+        <p>
+            Bạn có thể up hình thay thế cho background hiện tại
+        </p>
+        <br>
+        <input type="file" id="getval" name="background-image" />
+        <br>
+        <br>
+  <h2>
+    1/ QR Code: Bạn gán link chứa thông tin của bạn vào ô dưới
+      </h2>
+  <br>
+    <input type="text" id="qr-data">
+    <button id="generate-pdf">Tạo file pdf</button>
+  
+  <br>
+  <br>
+  <h2>
+    2/ Sau khi xuất file PDF, làm theo bước sau:
+  </h2>
+    <br>
+  <p>
+      2.1) Đem in màu khổ A4.
+  </p>
+  <p>
+      2.2) Cắt hình ra và dán lên thẻ NFC trắng.
+  </p>
+  </div>
+
+    <script src="qrcode.min.js"></script>
+    <script>
+      //name-color
+      document.getElementById('color').addEventListener('input', function(){
+        document.getElementById('name').style.color = this.value;
+      })
+      
+      //name
+      document.getElementById('replace-name').addEventListener('input', function(){
+        document.getElementById('name').innerHTML = this.value;
+      })
+      
+      
+      //enable/disable logo
+      const logo = document.getElementById('logo');
+        document.getElementById('turn-on-logo').addEventListener('click', function () {
+            logo.style.display = "block"
+        })
+        document.getElementById('turn-off-logo').addEventListener('click', function () {
+            logo.style.display = "none"
+        })
+      
+      //change logo
+      document.getElementById('logo-change').addEventListener('change', readLogoURL, true);
+        function readLogoURL() {
+            var file = document.getElementById("logo-change").files[0];
+            var reader = new FileReader();
+            reader.onloadend = function () {
+                document.getElementById('logo').src =  reader.result;
+            }
+            if (file) {
+                reader.readAsDataURL(file);
+            } else {
+            }
+        }
+      
+      //change background
+      document.getElementById('getval').addEventListener('change', readURL, true);
+        function readURL() {
+            var file = document.getElementById("getval").files[0];
+            var reader = new FileReader();
+            reader.onloadend = function () {
+                document.getElementById('image-cover').style.backgroundImage = "url(" + reader.result + ")";
+            }
+            if (file) {
+                reader.readAsDataURL(file);
+            } else {
+            }
+        }
+      
+        //pdf
+        window.html2canvas = html2canvas;
+        window.jsPDF = window.jspdf.jsPDF;
+        var generatePDFBtn = document.getElementById('generate-pdf');
+        generatePDFBtn.addEventListener('click', makePDF);
+
+        function makePDF() {
+            html2canvas(document.querySelector("#capture"), {
+                allowTaint: true,
+                useCORS: true,
+                scale: 1,
+              width: 1800,
+              height: 1400
+            }).then(canvas => {
+                //document.body.appendChild(canvas)
+                var img = canvas.toDataURL("image/png")
+
+                var doc = new jsPDF();
+                doc.addImage(img, 'PNG', 5, 0, 143, 108)
+                doc.save("htmltopdf");
+            });
+        }
+
+
+        //qr
+        var qrInput = document.getElementById('qr-data');
+        var qrCode = new QRCode(document.getElementById('qrcode'), { correctLevel: QRCode.CorrectLevel.H });
+        qrCode.makeCode("/");
+        qrInput.addEventListener('input', generateQR);
+
+        function generateQR() {
+            var data = qrInput.value;
+
+            //qrCode.clear();
+            qrCode.makeCode(data);
+        }
+    </script>
+</body>
+
+</html>
